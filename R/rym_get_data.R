@@ -82,6 +82,8 @@ function(direct.client.logins = NULL,
   }
 
   my_data <- do.call("rbind", result)
-
+  if (length(my_data$`Визиты`)>0) my_data$`Визиты` <- as.integer(my_data$`Визиты`)
+  if (length(my_data$`Количество отказов`)>0) my_data$`Количество отказов` <- as.integer(my_data$`Количество отказов`)
+  
   return(my_data)
 }

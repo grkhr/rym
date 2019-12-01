@@ -1,14 +1,14 @@
 rym_get_logs <-
-function(counter = NULL, 
-                         date.from = Sys.Date() - 10, 
-                         date.to = Sys.Date()-1, 
-                         fields = "ym:s:date,ym:s:counterID,ym:s:dateTime,
+  function(counter = NULL, 
+           date.from = Sys.Date() - 10, 
+           date.to = Sys.Date()-1, 
+           fields = "ym:s:date,ym:s:counterID,ym:s:dateTime,
 	ym:s:isNewUser,ym:s:startURL,ym:s:visitDuration,
 	ym:s:ipAddress,ym:s:referer", 
-                         source = "visits", 
-                         login = NULL,
-                         token.path = getwd()){
-  
+           source = "visits", 
+           login = NULL,
+           token.path = getwd()){
+    
     fun_start <- Sys.time()
     
     token <- rym_auth(login = login, token.path = token.path)$access_token
@@ -16,7 +16,7 @@ function(counter = NULL,
     #send query
     fields <- gsub("[\\s\\n\\t]","",fields,perl = TRUE) 
     logapi <- POST(paste0("https://api-metrika.yandex.ru/management/v1/counter/",counter,"/logrequests?date1=",date.from,"&date2=",date.to,"&fields=",fields,"&source=",source),
-	               add_headers(Authorization = paste0("OAuth ", token)))
+                   add_headers(Authorization = paste0("OAuth ", token)))
     queryparam <- content(logapi, "parsed", "application/json")
     
     #check error
@@ -40,7 +40,7 @@ function(counter = NULL,
     #check status
     while(request_status != "processed"){
       logapistatus <- GET(paste0("https://api-metrika.yandex.ru/management/v1/counter/",counter,"/logrequest/",request_id),
-	                      add_headers(Authorization = paste0("OAuth ", token)))
+                          add_headers(Authorization = paste0("OAuth ", token)))
       request_status <- content(logapistatus, "parsed", "application/json")$log_request$status
       
       #status
@@ -64,7 +64,7 @@ function(counter = NULL,
           packageStartupMessage(".", appendLF = FALSE)
           #get data
           logapidata <- GET(paste0("https://api-metrika.yandex.ru/management/v1/counter/",counter,"/logrequest/",request_id,"/part/",parts,"/download"),
-		                    add_headers(Authorization = paste0("OAuth ", token)))
+                            add_headers(Authorization = paste0("OAuth ", token)))
           rawdata <- try(content(logapidata,"text","application/json",encoding = "UTF-8"), silent = T)
           df_temp <- try(read.delim(text=rawdata, numerals = "no.loss"), silent = T)
           result <- rbind(result, df_temp)
@@ -74,7 +74,7 @@ function(counter = NULL,
         
         #remove from server
         req_delite <- POST(paste0("https://api-metrika.yandex.ru/management/v1/counter/",counter,"/logrequest/",request_id,"/clean"),
-		                   add_headers(Authorization = paste0("OAuth ", token)))
+                           add_headers(Authorization = paste0("OAuth ", token)))
         req_delite <- content(req_delite, "parsed", "application/json")
         #total info
         packageStartupMessage("Information: ")
@@ -93,7 +93,7 @@ function(counter = NULL,
       if(request_status == "processing_failed"){
         stop("Error in request processing")
       }
-	  
+      
       #stop if canceled
       if(request_status == "canceled"){
         stop("Request canceled")
